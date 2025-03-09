@@ -4,6 +4,7 @@ import { defineConfig } from "apibara/config";
 
 export default defineConfig({
   runtimeConfig: {
+    network: "sepolia",
     wheel: {
       startingBlock: 544_220,
       streamUrl: "https://starknet-sepolia.preview.apibara.org",

@@ -1,5 +1,5 @@
 {
-  "id": "676d5952-6f0c-4111-85d8-105179c81014",
+  "id": "2f8b361a-01b1-4165-aef4-88d431585595",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -37,9 +37,52 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "token_id_idx": {
+          "name": "token_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "token_address_idx": {
+          "name": "token_address_idx",
+          "columns": [
+            {
+              "expression": "address",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -79,7 +122,8 @@
           "name": "claimed",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
         "deposit_index": {
           "name": "deposit_index",
@@ -103,8 +147,7 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -114,6 +157,21 @@
         }
       },
       "indexes": {
+        "wheel_deposit_id_idx": {
+          "name": "wheel_deposit_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "wheel_deposit_participant_id_idx": {
           "name": "wheel_deposit_participant_id_idx",
           "columns": [
@@ -232,6 +290,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "tickets": {
+          "name": "tickets",
+          "type": "integer[]",
+          "primaryKey": false,
+          "notNull": false
+        },
         "deposited": {
           "name": "deposited",
           "type": "bigint",
@@ -242,13 +306,15 @@
           "name": "is_winner",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
         "prize_claimed": {
           "name": "prize_claimed",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
         "user_id": {
           "name": "user_id",
@@ -266,8 +332,7 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -277,6 +342,21 @@
         }
       },
       "indexes": {
+        "wheel_round_participant_id_idx": {
+          "name": "wheel_round_participant_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "wheel_round_participant_user_id_idx": {
           "name": "wheel_round_participant_user_id_idx",
           "columns": [
@@ -394,13 +474,13 @@
         },
         "cutoff_time": {
           "name": "cutoff_time",
-          "type": "bigint",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
         "drawn_at": {
           "name": "drawn_at",
-          "type": "bigint",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -408,37 +488,43 @@
           "name": "participants_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "tickets_count": {
           "name": "tickets_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "deposits_count": {
           "name": "deposits_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "total_deposit_amount": {
           "name": "total_deposit_amount",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "prize_pool_amount": {
           "name": "prize_pool_amount",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "fees_amount": {
           "name": "fees_amount",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
         },
         "winning_ticket": {
           "name": "winning_ticket",
@@ -468,8 +554,7 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -479,6 +564,21 @@
         }
       },
       "indexes": {
+        "wheel_round_id_idx": {
+          "name": "wheel_round_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "wheel_round_status_idx": {
           "name": "wheel_round_status_idx",
           "columns": [
@@ -645,8 +745,7 @@
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -656,6 +755,21 @@
         }
       },
       "indexes": {
+        "wheel_id_idx": {
+          "name": "wheel_id_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "wheel_address_idx": {
           "name": "wheel_address_idx",
           "columns": [
@@ -708,89 +822,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.wheel_tickets": {
-      "name": "wheel_tickets",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "number": {
-          "name": "number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "wheel_ticket_participant_id_idx": {
-          "name": "wheel_ticket_participant_id_idx",
-          "columns": [
-            {
-              "expression": "participant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "wheel_ticket_number_idx": {
-          "name": "wheel_ticket_number_idx",
-          "columns": [
-            {
-              "expression": "number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "wheel_tickets_participant_id_wheel_round_participants_id_fk": {
-          "name": "wheel_tickets_participant_id_wheel_round_participants_id_fk",
-          "tableFrom": "wheel_tickets",
-          "tableTo": "wheel_round_participants",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -806,9 +837,53 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_idx": {
+          "name": "user_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_address_idx": {
+          "name": "user_address_idx",
+          "columns": [
+            {
+              "expression": "address",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -838,46 +913,94 @@
           "name": "biggest_win",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "biggest_win_multiplier": {
           "name": "biggest_win_multiplier",
-          "type": "numeric",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "total_rounds_won": {
           "name": "total_rounds_won",
-          "type": "numeric",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "total_rounds_played": {
           "name": "total_rounds_played",
-          "type": "numeric",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 1
         },
         "total_deposit_amount": {
           "name": "total_deposit_amount",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "total_amount_won": {
           "name": "total_amount_won",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "user_id": {
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "wheel_metrics_idx": {
+          "name": "wheel_metrics_idx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "wheel_metrics_user_id_idx": {
+          "name": "wheel_metrics_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "wheel_metrics_user_id_users_id_fk": {
           "name": "wheel_metrics_user_id_users_id_fk",

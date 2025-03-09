@@ -27,7 +27,7 @@ export const wheelTable = pgTable(
     id: text("id").primaryKey().notNull(),
     address: text("address").notNull(),
     tokenId: text("token_id").references(() => tokenTable.id),
-    pricePerTicket: bigint("price_per_ticket", { mode: "number" }).notNull(),
+    pricePerTicket: bigint("price_per_ticket", { mode: "bigint" }).notNull(),
     roundsCount: integer("rounds_count").notNull(),
     roundDuration: integer("round_duration").notNull(),
     outflowAllowed: boolean("outflow_allowed").notNull(),
@@ -43,12 +43,11 @@ export const wheelTable = pgTable(
     protocolFeeBp: integer("protocol_fee_bp").notNull(),
     protocolFeeRecipient: text("protocol_fee_recipient").notNull(),
     vrf: text("vrf").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .$onUpdate(() => new Date()),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [
+    uniqueIndex("wheel_id_idx").on(table.id),
     uniqueIndex("wheel_address_idx").on(table.address),
     uniqueIndex("wheel_token_id_idx").on(table.tokenId),
   ]
@@ -60,28 +59,34 @@ export const wheelRoundTable = pgTable(
     id: text("id").primaryKey().notNull(),
     number: integer("number").notNull(),
     status: roundStatusEnum("status").notNull(),
-    pricePerTicket: bigint("price_per_ticket", { mode: "number" }).notNull(),
+    pricePerTicket: bigint("price_per_ticket", { mode: "bigint" }).notNull(),
     protocolFeeBp: integer("protocol_fee_bp").notNull(),
-    cutoffTime: bigint("cutoff_time", { mode: "number" }),
-    drawnAt: bigint("drawn_at", { mode: "number" }),
-    participantsCount: integer("participants_count").notNull(),
-    ticketsCount: integer("tickets_count").notNull(),
-    depositsCount: integer("deposits_count").notNull(),
+    cutoffTime: timestamp("cutoff_time"),
+    drawnAt: timestamp("drawn_at"),
+    participantsCount: integer("participants_count").default(0).notNull(),
+    ticketsCount: integer("tickets_count").default(0).notNull(),
+    depositsCount: integer("deposits_count").default(0).notNull(),
     totalDepositAmount: bigint("total_deposit_amount", {
-      mode: "number",
-    }).notNull(),
-    prizePoolAmount: bigint("prize_pool_amount", { mode: "number" }).notNull(),
-    feesAmount: bigint("fees_amount", { mode: "number" }).notNull(),
+      mode: "bigint",
+    })
+      .default(0 as unknown as bigint)
+      .notNull(),
+    prizePoolAmount: bigint("prize_pool_amount", { mode: "bigint" })
+      .default(0 as unknown as bigint)
+      .notNull(),
+    feesAmount: bigint("fees_amount", { mode: "bigint" })
+      .default(0 as unknown as bigint)
+      .notNull(),
     winningTicket: integer("winning_ticket"),
     randomValue: text("random_value"),
+
     winnerId: text("winner_id").references(() => userTable.id),
     wheelId: text("wheel_id").references(() => wheelTable.id),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .$onUpdate(() => new Date()),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [
+    uniqueIndex("wheel_round_id_idx").on(table.id),
     index("wheel_round_status_idx").on(table.status),
     index("wheel_round_wheel_id_idx").on(table.wheelId),
     index("wheel_round_winner_id_idx").on(table.winnerId),
@@ -92,36 +97,20 @@ export const wheelRoundParticipantTable = pgTable(
   "wheel_round_participants",
   {
     id: text("id").primaryKey().notNull(),
-    deposited: bigint("deposited", { mode: "number" }).notNull(),
-    isWinner: boolean("is_winner").notNull(),
-    prizeClaimed: boolean("prize_claimed").notNull(),
+    tickets: integer("tickets").array(),
+    deposited: bigint("deposited", { mode: "bigint" }).notNull(),
+    isWinner: boolean("is_winner").default(false).notNull(),
+    prizeClaimed: boolean("prize_claimed").default(false).notNull(),
     userId: text("user_id").references(() => userTable.id),
     roundId: text("round_id").references(() => wheelRoundTable.id),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .$onUpdate(() => new Date()),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [
+    uniqueIndex("wheel_round_participant_id_idx").on(table.id),
     index("wheel_round_participant_user_id_idx").on(table.userId),
     index("wheel_round_participant_round_id_idx").on(table.roundId),
     index("wheel_round_participant_is_winner_idx").on(table.isWinner),
-  ]
-);
-
-export const wheelTicketTable = pgTable(
-  "wheel_tickets",
-  {
-    id: text("id").primaryKey().notNull(),
-    number: integer("number").notNull(),
-    participantId: text("participant_id").references(
-      () => wheelRoundParticipantTable.id
-    ),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("wheel_ticket_participant_id_idx").on(table.participantId),
-    index("wheel_ticket_number_idx").on(table.number),
   ]
 );
 
@@ -130,20 +119,19 @@ export const wheelDepositTable = pgTable(
   {
     id: text("id").primaryKey().notNull(),
     tokenId: text("token_id").references(() => tokenTable.id),
-    amount: bigint("amount", { mode: "number" }).notNull(),
+    amount: bigint("amount", { mode: "bigint" }).notNull(),
     ticketsCount: integer("tickets_count").notNull(),
-    claimed: boolean("claimed").notNull(),
+    claimed: boolean("claimed").default(false).notNull(),
     depositIndex: integer("deposit_index").notNull(),
     participantId: text("participant_id").references(
       () => wheelRoundParticipantTable.id
     ),
     roundId: text("round_id").references(() => wheelRoundTable.id),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .$onUpdate(() => new Date()),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [
+    uniqueIndex("wheel_deposit_id_idx").on(table.id),
     index("wheel_deposit_participant_id_idx").on(table.participantId),
     index("wheel_deposit_round_id_idx").on(table.roundId),
     index("wheel_deposit_token_id_idx").on(table.tokenId),
@@ -188,16 +176,8 @@ export const wheelRoundParticipantRelations = relations(
       references: [wheelRoundTable.id],
     }),
     deposits: many(wheelDepositTable),
-    tickets: many(wheelTicketTable),
   })
 );
-
-export const wheelTicketRelations = relations(wheelTicketTable, ({ one }) => ({
-  participant: one(wheelRoundParticipantTable, {
-    fields: [wheelTicketTable.participantId],
-    references: [wheelRoundParticipantTable.id],
-  }),
-}));
 
 export const wheelDepositRelations = relations(
   wheelDepositTable,
