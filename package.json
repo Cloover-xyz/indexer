@@ -29,6 +29,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.17.23",
     "@types/pg": "^8.11.11",
+    "dotenv": "^16.4.7",
     "env-var": "^7.5.0",
     "typescript": "^5.8.2",
     "zod": "^3.24.2"

@@ -6,7 +6,7 @@ import pg from "pg";
 import * as userSchema from "./schema/users";
 import * as wheelSchema from "./schema/wheels";
 import * as tokenSchema from "./schema/tokens";
-import { drizzleStorage, useDrizzleStorage } from "@apibara/plugin-drizzle";
+import { useDrizzleStorage } from "@apibara/plugin-drizzle";
 
 interface GlobalConfig {
   postgresConnectionString: string;
@@ -37,7 +37,6 @@ class DbManager {
     const indexerId = "wheel";
     const { startingBlock, streamUrl, postgresConnectionString } =
       runtimeConfig[indexerId];
-
     this.config = {
       postgresConnectionString,
       network: runtimeConfig.network,
