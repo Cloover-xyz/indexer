@@ -4,19 +4,17 @@ import { StarknetStream } from "@apibara/starknet";
 import type { ApibaraRuntimeConfig } from "apibara/types";
 
 import { handleEvent } from "handlers";
-import { getValidatedNetwork } from "utils/provider";
-import { dbManager } from "../lib/db";
+import { configManager } from "../lib/configManager";
 
 export default function (runtimeConfig: ApibaraRuntimeConfig) {
-  dbManager.initialize(runtimeConfig);
+  configManager.initialize(runtimeConfig);
 
-  const network = getValidatedNetwork(dbManager.getNetwork());
-  const db = dbManager.getDb();
+  const db = configManager.getDb();
 
   return defineIndexer(StarknetStream)({
-    streamUrl: dbManager.getStreamUrl(),
+    streamUrl: configManager.getStreamUrl(),
     finality: "accepted",
-    startingBlock: BigInt(dbManager.getStartingBlock()),
+    startingBlock: configManager.getStartingBlock(),
     filter: {
       events: [
         {
@@ -32,7 +30,7 @@ export default function (runtimeConfig: ApibaraRuntimeConfig) {
         return;
       }
       for (const event of events) {
-        await handleEvent(event, header, network);
+        await handleEvent(event, header);
       }
     },
   });

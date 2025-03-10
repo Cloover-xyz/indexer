@@ -7,11 +7,12 @@ import * as userSchema from "./schema/users";
 import * as wheelSchema from "./schema/wheels";
 import * as tokenSchema from "./schema/tokens";
 import { useDrizzleStorage } from "@apibara/plugin-drizzle";
+import { getValidatedNetwork, type NetworkType } from "utils/provider";
 
 interface GlobalConfig {
   postgresConnectionString: string;
-  network: string;
-  startingBlock: number;
+  network: NetworkType;
+  startingBlock: bigint;
   streamUrl: string;
 }
 
@@ -19,18 +20,18 @@ const schema = { ...userSchema, ...wheelSchema, ...tokenSchema } as const;
 type Schema = typeof schema;
 type Database = NodePgDatabase<Schema>;
 
-class DbManager {
-  private static instance: DbManager;
+class ConfigManager {
+  private static instance: ConfigManager;
   private config: GlobalConfig | null = null;
   private dbInstance: Database | null = null;
 
   private constructor() {}
 
-  public static getInstance(): DbManager {
-    if (!DbManager.instance) {
-      DbManager.instance = new DbManager();
+  public static getInstance(): ConfigManager {
+    if (!ConfigManager.instance) {
+      ConfigManager.instance = new ConfigManager();
     }
-    return DbManager.instance;
+    return ConfigManager.instance;
   }
 
   public initialize(runtimeConfig: ApibaraRuntimeConfig) {
@@ -39,8 +40,8 @@ class DbManager {
       runtimeConfig[indexerId];
     this.config = {
       postgresConnectionString,
-      network: runtimeConfig.network,
-      startingBlock,
+      network: getValidatedNetwork(runtimeConfig.network),
+      startingBlock: BigInt(startingBlock),
       streamUrl,
     };
   }
@@ -56,11 +57,11 @@ class DbManager {
     return this.getConfig().postgresConnectionString;
   }
 
-  public getNetwork(): string {
+  public getNetwork(): NetworkType {
     return this.getConfig().network;
   }
 
-  public getStartingBlock(): number {
+  public getStartingBlock(): bigint {
     return this.getConfig().startingBlock;
   }
 
@@ -97,4 +98,4 @@ class DbManager {
   }
 }
 
-export const dbManager = DbManager.getInstance();
+export const configManager = ConfigManager.getInstance();

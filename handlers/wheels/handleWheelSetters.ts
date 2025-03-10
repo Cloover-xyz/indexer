@@ -52,14 +52,13 @@ const OUTFLOW_ALLOWED_TOGGLED_EVENT_SELECTOR = getBigIntSelector(
 
 export const handleWheelContractDeployed = async (
   event: Event,
-  header: BlockHeader,
-  network: NetworkType
+  header: BlockHeader
 ) => {
   const logger = useLogger();
   const { timestamp } = header;
   const { wheelAddress, data } = getWheelContractDeployedEventData(event);
   logger.log("Event ContractDeployed", { data });
-  await insertWheel(wheelAddress, data, network, timestamp);
+  await insertWheel(wheelAddress, data, timestamp);
 };
 
 export const handlePricePerTicketUpdated = async (
