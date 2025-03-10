@@ -1,6 +1,6 @@
-import { useDrizzleStorage } from "@apibara/plugin-drizzle";
 import { DepositedEvent, WheelContractDeployedEvent } from "../types/types";
 import { eq } from "drizzle-orm";
+
 import {
   wheelTable,
   tokenTable,
@@ -31,29 +31,28 @@ import {
 } from "./id-generation";
 import { TokenDbType } from "lib/types/tokens";
 import { UserDbType } from "lib/types/users";
-import { adaptAddress } from "utils/converters";
+
+import { dbManager } from "lib/db";
+import { useLogger } from "@apibara/indexer/plugins";
 
 export const getUser = async (
   userAddress: string
-): Promise<UserDbType | null> => {
-  const { db } = useDrizzleStorage();
-  return (
-    await db
-      .select()
-      .from(userTable)
-      .where(eq(userTable.id, getUserId(userAddress)))
-  )[0];
+): Promise<UserDbType | undefined> => {
+  const { db } = dbManager.useDrizzleStorageQuery();
+  return db.query.userTable.findFirst({
+    where: eq(userTable.id, getUserId(userAddress)),
+  });
 };
 
 export const getOrInitUser = async (
   userAddress: string,
   timestamp: Date
 ): Promise<UserDbType> => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const userId = getUserId(userAddress);
-  const user = (
-    await db.select().from(userTable).where(eq(userTable.id, userId))
-  )[0];
+  const user = await db.query.userTable.findFirst({
+    where: eq(userTable.id, userId),
+  });
   if (user) {
     return user;
   }
@@ -76,11 +75,8 @@ export const insertWheel = async (
   network: NetworkType,
   timestamp: Date
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const token = await getOrInitToken(data.token, network, timestamp);
-  if (!token) {
-    throw new Error("token not found");
-  }
   await db.insert(wheelTable).values({
     id: getWheelId(wheelAddress),
     address: wheelAddress,
@@ -104,7 +100,10 @@ export const updateWheel = async (
   wheelAddress: string,
   data: Record<string, unknown>
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
+  const a = await db.query.wheelTable.findFirst({
+    where: eq(wheelTable.id, getWheelId(wheelAddress)),
+  });
   await db
     .update(wheelTable)
     .set(data)
@@ -112,13 +111,10 @@ export const updateWheel = async (
 };
 
 export const getWheel = async (wheelAddress: string) => {
-  const { db } = useDrizzleStorage();
-  const wheel = (
-    await db
-      .select()
-      .from(wheelTable)
-      .where(eq(wheelTable.id, getWheelId(wheelAddress)))
-  )[0];
+  const { db } = dbManager.useDrizzleStorageQuery();
+  const wheel = await db.query.wheelTable.findFirst({
+    where: eq(wheelTable.id, getWheelId(wheelAddress)),
+  });
   if (!wheel) {
     throw new Error(`wheel with id ${wheelAddress} not found`);
   }
@@ -131,7 +127,7 @@ export const insertRound = async (
   status: RoundStatus,
   timestamp: Date
 ): Promise<WheelRoundDbType> => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const round = await db
     .insert(wheelRoundTable)
     .values({
@@ -150,22 +146,18 @@ export const insertRound = async (
 
 export const getRound = async (
   roundNumber: number
-): Promise<WheelRoundDbType | null> => {
-  const { db } = useDrizzleStorage();
-  const round = (
-    await db
-      .select()
-      .from(wheelRoundTable)
-      .where(eq(wheelRoundTable.id, getWheelRoundId(roundNumber)))
-  )[0];
-  return round;
+): Promise<WheelRoundDbType | undefined> => {
+  const { db } = dbManager.useDrizzleStorageQuery();
+  return db.query.wheelRoundTable.findFirst({
+    where: eq(wheelRoundTable.id, getWheelRoundId(roundNumber)),
+  });
 };
 
 export const updateRound = async (
   roundNumber: string,
   data: Record<string, unknown>
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   await db
     .update(wheelRoundTable)
     .set(data)
@@ -175,15 +167,12 @@ export const updateRound = async (
 export const getWheelParticipant = async (
   roundId: string,
   userId: string
-): Promise<WheelRoundParticipantDbType | null> => {
-  const { db } = useDrizzleStorage();
+): Promise<WheelRoundParticipantDbType | undefined> => {
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelRoundParticipantId(roundId, userId);
-  return (
-    await db
-      .select()
-      .from(wheelRoundParticipantTable)
-      .where(eq(wheelRoundParticipantTable.id, id))
-  )[0];
+  return db.query.wheelRoundParticipantTable.findFirst({
+    where: eq(wheelRoundParticipantTable.id, id),
+  });
 };
 
 export const insertWheelParticipant = async (
@@ -193,7 +182,7 @@ export const insertWheelParticipant = async (
   deposited: bigint,
   timestamp: Date
 ): Promise<WheelRoundParticipantDbType> => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelRoundParticipantId(roundId, userId);
   const participant = await db
     .insert(wheelRoundParticipantTable)
@@ -215,7 +204,7 @@ export const updateWheelParticipant = async (
   userId: string,
   data: Record<string, unknown>
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelRoundParticipantId(roundId, userId);
   return (
     await db
@@ -232,7 +221,7 @@ export const insertWheelDeposit = async (
   data: DepositedEvent,
   timestamp: Date
 ): Promise<WheelDepositDbType> => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelDepositId(round.id, round.depositsCount);
   const token = await getToken(data.token);
   const deposit = await db
@@ -257,7 +246,7 @@ export const updateWheelDeposit = async (
   depositIndex: number,
   data: Record<string, unknown>
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelDepositId(roundId, depositIndex);
   await db
     .update(wheelDepositTable)
@@ -266,14 +255,11 @@ export const updateWheelDeposit = async (
 };
 
 export const getUserWheelMetrics = async (userAddress: string) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getUserId(userAddress);
-  return (
-    await db
-      .select()
-      .from(wheelMetricsTable)
-      .where(eq(wheelMetricsTable.userId, id))
-  )[0];
+  return db.query.wheelMetricsTable.findFirst({
+    where: eq(wheelMetricsTable.userId, id),
+  });
 };
 
 export const addDepositToUserWheelMetrics = async (
@@ -282,14 +268,11 @@ export const addDepositToUserWheelMetrics = async (
   isNewParticipant: boolean,
   timestamp: Date
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   const id = getWheelMetricId(user.address);
-  let wheelMetrics = (
-    await db
-      .select()
-      .from(wheelMetricsTable)
-      .where(eq(wheelMetricsTable.id, id))
-  )[0];
+  let wheelMetrics = await db.query.wheelMetricsTable.findFirst({
+    where: eq(wheelMetricsTable.id, id),
+  });
   if (!wheelMetrics) {
     await db.insert(wheelMetricsTable).values({
       id,
@@ -316,7 +299,7 @@ export const updateUserWheelMetrics = async (
   userWheelMetricsId: string,
   data: Record<string, unknown>
 ) => {
-  const { db } = useDrizzleStorage();
+  const { db } = dbManager.useDrizzleStorageQuery();
   await db
     .update(wheelMetricsTable)
     .set(data)
@@ -328,14 +311,18 @@ export const getOrInitToken = async (
   network: NetworkType,
   timestamp: Date
 ): Promise<TokenDbType> => {
-  const { db } = useDrizzleStorage();
+  const logger = useLogger();
+  const { db } = dbManager.useDrizzleStorageQuery();
   tokenId = getTokenId(tokenId);
-  let token = (
-    await db.select().from(tokenTable).where(eq(tokenTable.id, tokenId))
-  )[0];
+  logger.log("tokenId", tokenId);
+  let token = await db.query.tokenTable.findFirst({
+    where: eq(tokenTable.id, tokenId),
+  });
+  logger.log("token", token);
   if (token) {
     return token;
   }
+  logger.log("token not found, fetching from provider");
   const provider = getStarknetProvider(network);
   const { abi } = await provider.getClassAt(tokenId);
   if (!abi) {
@@ -373,11 +360,12 @@ export const getOrInitToken = async (
 };
 
 export const getToken = async (tokenId: string): Promise<TokenDbType> => {
-  const { db } = useDrizzleStorage();
-  return (
-    await db
-      .select()
-      .from(tokenTable)
-      .where(eq(tokenTable.id, getTokenId(tokenId)))
-  )[0];
+  const { db } = dbManager.useDrizzleStorageQuery();
+  const token = await db.query.tokenTable.findFirst({
+    where: eq(tokenTable.id, getTokenId(tokenId)),
+  });
+  if (!token) {
+    throw new Error(`token not found ${tokenId}`);
+  }
+  return token;
 };

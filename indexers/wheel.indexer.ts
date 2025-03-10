@@ -3,20 +3,20 @@ import { drizzleStorage } from "@apibara/plugin-drizzle";
 import { StarknetStream } from "@apibara/starknet";
 import type { ApibaraRuntimeConfig } from "apibara/types";
 
-import { getDrizzlePgDatabase } from "../lib/db";
 import { handleEvent } from "handlers";
 import { getValidatedNetwork } from "utils/provider";
+import { dbManager } from "../lib/db";
 
 export default function (runtimeConfig: ApibaraRuntimeConfig) {
-  const indexerId = "wheel";
-  const { startingBlock, streamUrl, postgresConnectionString } =
-    runtimeConfig[indexerId];
-  const network = getValidatedNetwork(runtimeConfig.network);
-  const { db } = getDrizzlePgDatabase(postgresConnectionString);
+  dbManager.initialize(runtimeConfig);
+
+  const network = getValidatedNetwork(dbManager.getNetwork());
+  const db = dbManager.getDb();
+
   return defineIndexer(StarknetStream)({
-    streamUrl,
+    streamUrl: dbManager.getStreamUrl(),
     finality: "accepted",
-    startingBlock: BigInt(startingBlock),
+    startingBlock: BigInt(dbManager.getStartingBlock()),
     filter: {
       events: [
         {
