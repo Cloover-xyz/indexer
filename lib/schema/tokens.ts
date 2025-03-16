@@ -14,8 +14,8 @@ export const tokenTable = pgTable(
     name: text("name").notNull(),
     symbol: text("symbol").notNull(),
     decimals: integer("decimals").notNull(),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("token_id_idx").on(table.id),

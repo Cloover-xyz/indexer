@@ -67,7 +67,7 @@ export const handleRoundStatusUpdated = async (
       updatedAt: timestamp,
     });
   }
-  if (status === RoundStatus.Open) {
+  if (status === RoundStatus.Open && roundId > wheel.roundsCount) {
     await updateWheel(wheelAddress, {
       roundsCount: wheel.roundsCount + 1,
       updatedAt: timestamp,

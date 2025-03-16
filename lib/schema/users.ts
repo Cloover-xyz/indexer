@@ -17,8 +17,8 @@ export const userTable = pgTable(
   {
     id: text("id").primaryKey().notNull(),
     address: text("address").notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow(),
-    updatedAt: timestamp("updated_at")
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .notNull()
       .$onUpdate(() => new Date()),
   },
@@ -47,8 +47,8 @@ export const wheelMetricsTable = pgTable(
       .default(0 as unknown as bigint)
       .notNull(),
     userId: text("user_id").references(() => userTable.id),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("wheel_metrics_idx").on(table.id),

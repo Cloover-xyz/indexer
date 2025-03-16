@@ -43,8 +43,8 @@ export const wheelTable = pgTable(
     protocolFeeBp: integer("protocol_fee_bp").notNull(),
     protocolFeeRecipient: text("protocol_fee_recipient").notNull(),
     vrf: text("vrf").notNull(),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("wheel_id_idx").on(table.id),
@@ -61,8 +61,8 @@ export const wheelRoundTable = pgTable(
     status: roundStatusEnum("status").notNull(),
     pricePerTicket: bigint("price_per_ticket", { mode: "bigint" }).notNull(),
     protocolFeeBp: integer("protocol_fee_bp").notNull(),
-    cutoffTime: timestamp("cutoff_time"),
-    drawnAt: timestamp("drawn_at"),
+    cutoffTime: timestamp("cutoff_time", { withTimezone: true }),
+    drawnAt: timestamp("drawn_at", { withTimezone: true }),
     participantsCount: integer("participants_count").default(0).notNull(),
     ticketsCount: integer("tickets_count").default(0).notNull(),
     depositsCount: integer("deposits_count").default(0).notNull(),
@@ -82,8 +82,8 @@ export const wheelRoundTable = pgTable(
 
     winnerId: text("winner_id").references(() => userTable.id),
     wheelId: text("wheel_id").references(() => wheelTable.id),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("wheel_round_id_idx").on(table.id),
@@ -103,8 +103,8 @@ export const wheelRoundParticipantTable = pgTable(
     prizeClaimed: boolean("prize_claimed").default(false).notNull(),
     userId: text("user_id").references(() => userTable.id),
     roundId: text("round_id").references(() => wheelRoundTable.id),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("wheel_round_participant_id_idx").on(table.id),
@@ -127,8 +127,8 @@ export const wheelDepositTable = pgTable(
       () => wheelRoundParticipantTable.id
     ),
     roundId: text("round_id").references(() => wheelRoundTable.id),
-    createdAt: timestamp("created_at").notNull(),
-    updatedAt: timestamp("updated_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   },
   (table) => [
     uniqueIndex("wheel_deposit_id_idx").on(table.id),
