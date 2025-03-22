@@ -69,7 +69,10 @@ export const handlePricePerTicketUpdated = async (
   const { timestamp } = header;
   const { wheelAddress, data } = getPricePerTicketUpdatedEventData(event);
   logger.log("Event PricePerTicketUpdated", { data });
-  await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });
+  await updateWheel(wheelAddress, {
+    pricePerTicket: data.pricePerTicket.toString(),
+    updatedAt: timestamp,
+  });
 };
 
 export const handleProtocolFeeBpUpdated = async (

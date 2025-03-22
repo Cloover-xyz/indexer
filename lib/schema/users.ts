@@ -3,9 +3,9 @@ import {
   text,
   uniqueIndex,
   index,
-  bigint,
   integer,
   timestamp,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { wheelRoundParticipantTable, wheelRoundTable } from "./wheels";
@@ -32,26 +32,30 @@ export const wheelMetricsTable = pgTable(
   "wheel_metrics",
   {
     id: text("id").primaryKey().notNull(),
-    biggestWin: bigint("biggest_win", { mode: "bigint" })
-      .default(0 as unknown as bigint)
+    biggestWin: numeric("biggest_win", { precision: 256, scale: 0 })
+      .default("0")
       .notNull(),
     biggestWinMultiplier: integer("biggest_win_multiplier")
       .default(0)
       .notNull(),
     totalRoundsWon: integer("total_rounds_won").default(0).notNull(),
     totalRoundsPlayed: integer("total_rounds_played").default(1).notNull(),
-    totalDepositAmount: bigint("total_deposit_amount", {
-      mode: "bigint",
-    }).notNull(),
-    totalAmountWon: bigint("total_amount_won", { mode: "bigint" })
-      .default(0 as unknown as bigint)
-      .notNull(),
+    totalDepositAmount: numeric("total_deposit_amount", {
+      precision: 256,
+      scale: 0,
+    }).default("0"),
+    totalAmountWon: numeric("total_amount_won", {
+      precision: 256,
+      scale: 0,
+    }).default("0"),
     userId: text("user_id").references(() => userTable.id),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .$onUpdate(() => new Date()),
   },
   (table) => [
-    uniqueIndex("wheel_metrics_idx").on(table.id),
+    uniqueIndex("wheel_metrics_id_idx").on(table.id),
     index("wheel_metrics_user_id_idx").on(table.userId),
   ]
 );

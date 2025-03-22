@@ -5,62 +5,62 @@ CREATE TABLE IF NOT EXISTS "tokens" (
 	"name" text NOT NULL,
 	"symbol" text NOT NULL,
 	"decimals" integer NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "wheel_deposits" (
 	"id" text PRIMARY KEY NOT NULL,
 	"token_id" text,
-	"amount" bigint NOT NULL,
+	"amount" numeric(256, 0) NOT NULL,
 	"tickets_count" integer NOT NULL,
 	"claimed" boolean DEFAULT false NOT NULL,
 	"deposit_index" integer NOT NULL,
 	"participant_id" text,
 	"round_id" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "wheel_round_participants" (
 	"id" text PRIMARY KEY NOT NULL,
 	"tickets" integer[],
-	"deposited" bigint NOT NULL,
+	"deposited" numeric(256, 0) NOT NULL,
 	"is_winner" boolean DEFAULT false NOT NULL,
 	"prize_claimed" boolean DEFAULT false NOT NULL,
 	"user_id" text,
 	"round_id" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "wheel_rounds" (
 	"id" text PRIMARY KEY NOT NULL,
 	"number" integer NOT NULL,
 	"status" "round_status" NOT NULL,
-	"price_per_ticket" bigint NOT NULL,
+	"price_per_ticket" numeric(256, 0) NOT NULL,
 	"protocol_fee_bp" integer NOT NULL,
-	"cutoff_time" timestamp,
-	"drawn_at" timestamp,
+	"cutoff_time" timestamp with time zone,
+	"drawn_at" timestamp with time zone,
 	"participants_count" integer DEFAULT 0 NOT NULL,
 	"tickets_count" integer DEFAULT 0 NOT NULL,
 	"deposits_count" integer DEFAULT 0 NOT NULL,
-	"total_deposit_amount" bigint DEFAULT 0 NOT NULL,
-	"prize_pool_amount" bigint DEFAULT 0 NOT NULL,
-	"fees_amount" bigint DEFAULT 0 NOT NULL,
+	"total_deposit_amount" numeric(256, 0) DEFAULT '0' NOT NULL,
+	"prize_pool_amount" numeric(256, 0) DEFAULT '0' NOT NULL,
+	"fees_amount" numeric(256, 0) DEFAULT '0' NOT NULL,
 	"winning_ticket" integer,
-	"random_value" text,
+	"random_value" numeric(256, 0),
 	"winner_id" text,
 	"wheel_id" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "wheels" (
 	"id" text PRIMARY KEY NOT NULL,
 	"address" text NOT NULL,
 	"token_id" text,
-	"price_per_ticket" bigint NOT NULL,
+	"price_per_ticket" numeric(256, 0) NOT NULL,
 	"rounds_count" integer NOT NULL,
 	"round_duration" integer NOT NULL,
 	"outflow_allowed" boolean NOT NULL,
@@ -70,29 +70,29 @@ CREATE TABLE IF NOT EXISTS "wheels" (
 	"protocol_fee_bp" integer NOT NULL,
 	"protocol_fee_recipient" text NOT NULL,
 	"vrf" text NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone NOT NULL,
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"address" text NOT NULL,
-	"created_at" timestamp DEFAULT now(),
-	"updated_at" timestamp NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone NOT NULL,
 	CONSTRAINT "users_address_unique" UNIQUE("address")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "wheel_metrics" (
 	"id" text PRIMARY KEY NOT NULL,
-	"biggest_win" bigint DEFAULT 0 NOT NULL,
+	"biggest_win" numeric(256, 0) DEFAULT '0' NOT NULL,
 	"biggest_win_multiplier" integer DEFAULT 0 NOT NULL,
 	"total_rounds_won" integer DEFAULT 0 NOT NULL,
 	"total_rounds_played" integer DEFAULT 1 NOT NULL,
-	"total_deposit_amount" bigint NOT NULL,
-	"total_amount_won" bigint DEFAULT 0 NOT NULL,
+	"total_deposit_amount" numeric(256, 0) DEFAULT '0',
+	"total_amount_won" numeric(256, 0) DEFAULT '0',
 	"user_id" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -169,5 +169,5 @@ CREATE UNIQUE INDEX IF NOT EXISTS "wheel_address_idx" ON "wheels" USING btree ("
 CREATE UNIQUE INDEX IF NOT EXISTS "wheel_token_id_idx" ON "wheels" USING btree ("token_id");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "user_idx" ON "users" USING btree ("id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "user_address_idx" ON "users" USING btree ("address");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "wheel_metrics_idx" ON "wheel_metrics" USING btree ("id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "wheel_metrics_id_idx" ON "wheel_metrics" USING btree ("id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "wheel_metrics_user_id_idx" ON "wheel_metrics" USING btree ("user_id");

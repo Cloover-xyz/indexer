@@ -35,7 +35,7 @@ class ConfigManager {
   }
 
   public initialize(runtimeConfig: ApibaraRuntimeConfig) {
-    const indexerId = "wheel";
+    const indexerId = "cloover";
     const { startingBlock, streamUrl, postgresConnectionString } =
       runtimeConfig[indexerId];
     this.config = {

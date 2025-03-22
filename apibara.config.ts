@@ -6,7 +6,7 @@ import { ENV } from "./utils/env";
 export default defineConfig({
   runtimeConfig: {
     network: "sepolia",
-    wheel: {
+    cloover: {
       startingBlock: 544_220,
       streamUrl: "https://starknet-sepolia.preview.apibara.org",
       postgresConnectionString: ENV.POSTGRES_DATABASE_URL ?? "memory://wheel",

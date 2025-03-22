@@ -1,5 +1,5 @@
 {
-  "id": "489fb929-fee0-45d3-9fa8-0920c909d841",
+  "id": "a251927a-cdcc-4b5c-a7d2-5e930817cbb2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -40,13 +40,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -108,7 +108,7 @@
         },
         "amount": {
           "name": "amount",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true
         },
@@ -145,13 +145,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -298,7 +298,7 @@
         },
         "deposited": {
           "name": "deposited",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true
         },
@@ -330,13 +330,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -462,7 +462,7 @@
         },
         "price_per_ticket": {
           "name": "price_per_ticket",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true
         },
@@ -474,13 +474,13 @@
         },
         "cutoff_time": {
           "name": "cutoff_time",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
         "drawn_at": {
           "name": "drawn_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -507,24 +507,24 @@
         },
         "total_deposit_amount": {
           "name": "total_deposit_amount",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'0'"
         },
         "prize_pool_amount": {
           "name": "prize_pool_amount",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'0'"
         },
         "fees_amount": {
           "name": "fees_amount",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'0'"
         },
         "winning_ticket": {
           "name": "winning_ticket",
@@ -534,7 +534,7 @@
         },
         "random_value": {
           "name": "random_value",
-          "type": "text",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": false
         },
@@ -552,13 +552,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -683,7 +683,7 @@
         },
         "price_per_ticket": {
           "name": "price_per_ticket",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true
         },
@@ -743,13 +743,13 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -840,14 +840,14 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -911,10 +911,10 @@
         },
         "biggest_win": {
           "name": "biggest_win",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": "'0'"
         },
         "biggest_win_multiplier": {
           "name": "biggest_win_multiplier",
@@ -939,16 +939,17 @@
         },
         "total_deposit_amount": {
           "name": "total_deposit_amount",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": "'0'"
         },
         "total_amount_won": {
           "name": "total_amount_won",
-          "type": "bigint",
+          "type": "numeric(256, 0)",
           "primaryKey": false,
-          "notNull": true,
-          "default": 0
+          "notNull": false,
+          "default": "'0'"
         },
         "user_id": {
           "name": "user_id",
@@ -958,20 +959,21 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": "now()"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {
-        "wheel_metrics_idx": {
-          "name": "wheel_metrics_idx",
+        "wheel_metrics_id_idx": {
+          "name": "wheel_metrics_id_idx",
           "columns": [
             {
               "expression": "id",

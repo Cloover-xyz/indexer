@@ -32,3 +32,17 @@ export const subtractBigIntish = (
 export const isBigIntishZero = (a: string | bigint): boolean => {
   return BigInt(a) === BigInt(0);
 };
+
+export const getMaxBigInt = (
+  a: string | bigint,
+  b: string | bigint
+): bigint => {
+  return BigInt(a) > BigInt(b) ? BigInt(a) : BigInt(b);
+};
+
+export const getMinBigInt = (
+  a: string | bigint,
+  b: string | bigint
+): bigint => {
+  return BigInt(a) < BigInt(b) ? BigInt(a) : BigInt(b);
+};

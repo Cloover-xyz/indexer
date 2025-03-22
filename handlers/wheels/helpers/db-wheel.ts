@@ -33,7 +33,7 @@ import { TokenDbType } from "lib/types/tokens";
 import { UserDbType } from "lib/types/users";
 
 import { configManager } from "lib/configManager";
-import { useLogger } from "@apibara/indexer/plugins";
+import { addBigIntish } from "utils/maths";
 
 export const getUser = async (
   userAddress: string
@@ -81,7 +81,7 @@ export const insertWheel = async (
     address: wheelAddress,
     tokenId: token.id,
     roundsCount: 0,
-    pricePerTicket: data.pricePerTicket,
+    pricePerTicket: data.pricePerTicket.toString(),
     roundDuration: data.roundDuration,
     protocolFeeBp: data.protocolFeeBp,
     protocolFeeRecipient: data.protocolFeeRecipient,
@@ -100,9 +100,6 @@ export const updateWheel = async (
   data: Record<string, unknown>
 ) => {
   const { db } = configManager.useDrizzleStorageQuery();
-  const a = await db.query.wheelTable.findFirst({
-    where: eq(wheelTable.id, getWheelId(wheelAddress)),
-  });
   await db
     .update(wheelTable)
     .set(data)
@@ -132,7 +129,7 @@ export const insertRound = async (
     .values({
       id: getWheelRoundId(roundNumber),
       number: roundNumber,
-      pricePerTicket: wheel.pricePerTicket,
+      pricePerTicket: wheel.pricePerTicket.toString(),
       protocolFeeBp: wheel.protocolFeeBp,
       wheelId: wheel.id,
       status,
@@ -188,7 +185,7 @@ export const insertWheelParticipant = async (
     .values({
       id,
       tickets,
-      deposited,
+      deposited: deposited.toString(),
       userId,
       roundId,
       createdAt: timestamp,
@@ -228,7 +225,7 @@ export const insertWheelDeposit = async (
     .values({
       id,
       ticketsCount: data.ticketsCount,
-      amount: data.amount,
+      amount: data.amount.toString(),
       depositIndex: round.depositsCount,
       roundId: round.id,
       tokenId: token.id,
@@ -276,7 +273,7 @@ export const addDepositToUserWheelMetrics = async (
     await db.insert(wheelMetricsTable).values({
       id,
       userId: user.id,
-      totalDepositAmount: data.amount,
+      totalDepositAmount: data.amount.toString(),
       createdAt: timestamp,
       updatedAt: timestamp,
     });
@@ -284,7 +281,10 @@ export const addDepositToUserWheelMetrics = async (
     await db
       .update(wheelMetricsTable)
       .set({
-        totalDepositAmount: wheelMetrics.totalDepositAmount! + data.amount,
+        totalDepositAmount: addBigIntish(
+          wheelMetrics.totalDepositAmount!,
+          data.amount
+        ).toString(),
         totalRoundsPlayed: isNewParticipant
           ? wheelMetrics.totalRoundsPlayed + 1
           : wheelMetrics.totalRoundsPlayed,
@@ -309,18 +309,14 @@ export const getOrInitToken = async (
   tokenId: string,
   timestamp: Date
 ): Promise<TokenDbType> => {
-  const logger = useLogger();
   const { db } = configManager.useDrizzleStorageQuery();
   tokenId = getTokenId(tokenId);
-  logger.log("tokenId", tokenId);
   let token = await db.query.tokenTable.findFirst({
     where: eq(tokenTable.id, tokenId),
   });
-  logger.log("token", token);
   if (token) {
     return token;
   }
-  logger.log("token not found, fetching from provider");
   const provider = getStarknetProvider(configManager.getNetwork());
   const { abi } = await provider.getClassAt(tokenId);
   if (!abi) {

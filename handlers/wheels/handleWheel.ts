@@ -1,7 +1,12 @@
 import { Event, getBigIntSelector, BlockHeader } from "@apibara/starknet";
 import { useLogger } from "@apibara/indexer/plugins";
 
-import { calculateFeesAmount, calculateWinMultiplier } from "utils/maths";
+import {
+  addBigIntish,
+  calculateFeesAmount,
+  calculateWinMultiplier,
+  getMaxBigInt,
+} from "utils/maths";
 import {
   getRoundCutoffTimeSetEventData,
   getRoundStatusUpdatedEventData,
@@ -28,6 +33,7 @@ import {
   updateUserWheelMetrics,
 } from "./helpers/db-wheel";
 import { RoundStatus } from "./types/enums";
+import { zeroBI } from "utils/converters";
 
 const ROUND_STATUS_UPDATED_EVENT_SELECTOR =
   getBigIntSelector("RoundStatusUpdated").toString();
@@ -127,7 +133,7 @@ export const handleDeposited = async (event: Event, header: BlockHeader) => {
   } else {
     await updateWheelParticipant(round.id, user.id, {
       tickets: [...participant.tickets!, ...tickets],
-      deposited: participant.deposited + data.amount,
+      deposited: addBigIntish(participant.deposited, data.amount).toString(),
       updatedAt: timestamp,
     });
   }
@@ -140,9 +146,15 @@ export const handleDeposited = async (event: Event, header: BlockHeader) => {
   const prizePoolAmountToAdd = data.amount - feesAmount;
   await updateRound(round.id, {
     ticketsCount: round.ticketsCount + data.ticketsCount,
-    totalDepositAmount: round.totalDepositAmount + data.amount,
-    feesAmount: round.feesAmount + feesAmount,
-    prizePoolAmount: round.prizePoolAmount + prizePoolAmountToAdd,
+    totalDepositAmount: addBigIntish(
+      round.totalDepositAmount,
+      data.amount
+    ).toString(),
+    feesAmount: addBigIntish(round.feesAmount, feesAmount).toString(),
+    prizePoolAmount: addBigIntish(
+      round.prizePoolAmount,
+      prizePoolAmountToAdd
+    ).toString(),
     participantsCount: isNewParticipant
       ? round.participantsCount + 1
       : round.participantsCount,
@@ -225,24 +237,26 @@ export const handleWinnerDrawn = async (event: Event, header: BlockHeader) => {
   if (!userWheelMetrics) {
     throw new Error(`User wheel metrics not found for user ${user.address}`);
   }
-  const biggestWin =
-    userWheelMetrics.biggestWin < round.prizePoolAmount
-      ? round.prizePoolAmount
-      : userWheelMetrics.biggestWin;
+
   const winMultiplier = calculateWinMultiplier(
     round.prizePoolAmount,
     participant.deposited
   );
-  const biggestWinMultiplier =
-    userWheelMetrics.biggestWinMultiplier < winMultiplier
-      ? winMultiplier
-      : userWheelMetrics.biggestWinMultiplier!;
 
   await updateUserWheelMetrics(userWheelMetrics.id, {
     totalRoundsWon: userWheelMetrics.totalRoundsWon + 1,
-    totalAmountWon: userWheelMetrics.totalAmountWon + round.prizePoolAmount,
-    biggestWin,
-    biggestWinMultiplier,
+    totalAmountWon: addBigIntish(
+      userWheelMetrics.totalAmountWon ?? zeroBI(),
+      round.prizePoolAmount
+    ).toString(),
+    biggestWin: getMaxBigInt(
+      userWheelMetrics.biggestWin,
+      round.prizePoolAmount
+    ).toString(),
+    biggestWinMultiplier: Math.max(
+      userWheelMetrics.biggestWinMultiplier,
+      winMultiplier
+    ),
     updatedAt: timestamp,
   });
 };

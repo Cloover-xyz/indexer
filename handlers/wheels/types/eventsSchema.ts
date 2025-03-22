@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   zAddress,
   zBigInt,
-  zBoolean,
   zEnum,
   zNumber,
   zNumberArray,
@@ -20,7 +19,7 @@ export const WheelContractDeployedEventSchema = z.object({
   maximumNumberOfDepositsPerRound: zNumber,
   maximumParticipantTicketsPerRound: zNumber,
   vrf: zAddress,
-  outflowAllowed: zBoolean,
+  outflowAllowed: z.boolean(),
 });
 
 export const WithdrawalCallDataSchema = z.object({
@@ -88,7 +87,7 @@ export const PricePerTicketUpdatedEventSchema = z.object({
 });
 
 export const OutflowAllowedToggledEventSchema = z.object({
-  outflowAllowed: zBoolean,
+  outflowAllowed: z.boolean(),
 });
 
 export const VRFUpdatedEventSchema = z.object({

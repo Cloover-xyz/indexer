@@ -1,13 +1,13 @@
 import {
   pgTable,
   text,
-  bigint,
   integer,
   boolean,
   timestamp,
   pgEnum,
   uniqueIndex,
   index,
+  numeric,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { userTable } from "./users";
@@ -27,7 +27,10 @@ export const wheelTable = pgTable(
     id: text("id").primaryKey().notNull(),
     address: text("address").notNull(),
     tokenId: text("token_id").references(() => tokenTable.id),
-    pricePerTicket: bigint("price_per_ticket", { mode: "bigint" }).notNull(),
+    pricePerTicket: numeric("price_per_ticket", {
+      precision: 256,
+      scale: 0,
+    }).notNull(),
     roundsCount: integer("rounds_count").notNull(),
     roundDuration: integer("round_duration").notNull(),
     outflowAllowed: boolean("outflow_allowed").notNull(),
@@ -59,27 +62,33 @@ export const wheelRoundTable = pgTable(
     id: text("id").primaryKey().notNull(),
     number: integer("number").notNull(),
     status: roundStatusEnum("status").notNull(),
-    pricePerTicket: bigint("price_per_ticket", { mode: "bigint" }).notNull(),
+    pricePerTicket: numeric("price_per_ticket", {
+      precision: 256,
+      scale: 0,
+    }).notNull(),
     protocolFeeBp: integer("protocol_fee_bp").notNull(),
     cutoffTime: timestamp("cutoff_time", { withTimezone: true }),
     drawnAt: timestamp("drawn_at", { withTimezone: true }),
     participantsCount: integer("participants_count").default(0).notNull(),
     ticketsCount: integer("tickets_count").default(0).notNull(),
     depositsCount: integer("deposits_count").default(0).notNull(),
-    totalDepositAmount: bigint("total_deposit_amount", {
-      mode: "bigint",
+    totalDepositAmount: numeric("total_deposit_amount", {
+      precision: 256,
+      scale: 0,
     })
-      .default(0 as unknown as bigint)
+      .default("0")
       .notNull(),
-    prizePoolAmount: bigint("prize_pool_amount", { mode: "bigint" })
-      .default(0 as unknown as bigint)
+    prizePoolAmount: numeric("prize_pool_amount", {
+      precision: 256,
+      scale: 0,
+    })
+      .default("0")
       .notNull(),
-    feesAmount: bigint("fees_amount", { mode: "bigint" })
-      .default(0 as unknown as bigint)
+    feesAmount: numeric("fees_amount", { precision: 256, scale: 0 })
+      .default("0")
       .notNull(),
     winningTicket: integer("winning_ticket"),
-    randomValue: text("random_value"),
-
+    randomValue: numeric("random_value", { precision: 256, scale: 0 }),
     winnerId: text("winner_id").references(() => userTable.id),
     wheelId: text("wheel_id").references(() => wheelTable.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
@@ -98,7 +107,7 @@ export const wheelRoundParticipantTable = pgTable(
   {
     id: text("id").primaryKey().notNull(),
     tickets: integer("tickets").array(),
-    deposited: bigint("deposited", { mode: "bigint" }).notNull(),
+    deposited: numeric("deposited", { precision: 256, scale: 0 }).notNull(),
     isWinner: boolean("is_winner").default(false).notNull(),
     prizeClaimed: boolean("prize_claimed").default(false).notNull(),
     userId: text("user_id").references(() => userTable.id),
@@ -119,7 +128,7 @@ export const wheelDepositTable = pgTable(
   {
     id: text("id").primaryKey().notNull(),
     tokenId: text("token_id").references(() => tokenTable.id),
-    amount: bigint("amount", { mode: "bigint" }).notNull(),
+    amount: numeric("amount", { precision: 256, scale: 0 }).notNull(),
     ticketsCount: integer("tickets_count").notNull(),
     claimed: boolean("claimed").default(false).notNull(),
     depositIndex: integer("deposit_index").notNull(),

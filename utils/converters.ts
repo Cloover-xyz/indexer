@@ -26,7 +26,6 @@ export const zNumber = z.bigint().transform((val) => parseInt(val.toString()));
 export const zBigInt = z.bigint();
 export const zAddress = z.string().transform((val) => adaptAddress(val));
 export const zNumberArray = z.array(zNumber);
-export const zBoolean = z.boolean();
 // Custom enum transformer
 export const zEnum = <T extends Record<string, string>>(enumObject: T) =>
   z.bigint().transform((val: bigint) => {
