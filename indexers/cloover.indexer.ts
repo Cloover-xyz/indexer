@@ -13,7 +13,7 @@ export default function (runtimeConfig: ApibaraRuntimeConfig) {
 
   return defineIndexer(StarknetStream)({
     streamUrl: configManager.getStreamUrl(),
-    finality: "pending",
+    finality: "accepted",
     startingBlock: configManager.getStartingBlock(),
     filter: {
       events: [
