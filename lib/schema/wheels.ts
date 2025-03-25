@@ -130,7 +130,7 @@ export const wheelDepositTable = pgTable(
     tokenId: text("token_id").references(() => tokenTable.id),
     amount: numeric("amount", { precision: 256, scale: 0 }).notNull(),
     ticketsCount: integer("tickets_count").notNull(),
-    claimed: boolean("claimed").default(false).notNull(),
+    withdrawn: boolean("withdrawn").default(false).notNull(),
     depositIndex: integer("deposit_index").notNull(),
     participantId: text("participant_id").references(
       () => wheelRoundParticipantTable.id
@@ -144,7 +144,7 @@ export const wheelDepositTable = pgTable(
     index("wheel_deposit_participant_id_idx").on(table.participantId),
     index("wheel_deposit_round_id_idx").on(table.roundId),
     index("wheel_deposit_token_id_idx").on(table.tokenId),
-    index("wheel_deposit_claimed_idx").on(table.claimed),
+    index("wheel_deposit_withdrawn_idx").on(table.withdrawn),
   ]
 );
 

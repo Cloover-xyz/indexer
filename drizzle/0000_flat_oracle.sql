@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "wheel_deposits" (
 	"token_id" text,
 	"amount" numeric(256, 0) NOT NULL,
 	"tickets_count" integer NOT NULL,
-	"claimed" boolean DEFAULT false NOT NULL,
+	"withdrawn" boolean DEFAULT false NOT NULL,
 	"deposit_index" integer NOT NULL,
 	"participant_id" text,
 	"round_id" text,
@@ -155,7 +155,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "wheel_deposit_id_idx" ON "wheel_deposits" USI
 CREATE INDEX IF NOT EXISTS "wheel_deposit_participant_id_idx" ON "wheel_deposits" USING btree ("participant_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "wheel_deposit_round_id_idx" ON "wheel_deposits" USING btree ("round_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "wheel_deposit_token_id_idx" ON "wheel_deposits" USING btree ("token_id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "wheel_deposit_claimed_idx" ON "wheel_deposits" USING btree ("claimed");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "wheel_deposit_withdrawn_idx" ON "wheel_deposits" USING btree ("withdrawn");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "wheel_round_participant_id_idx" ON "wheel_round_participants" USING btree ("id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "wheel_round_participant_user_id_idx" ON "wheel_round_participants" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "wheel_round_participant_round_id_idx" ON "wheel_round_participants" USING btree ("round_id");--> statement-breakpoint

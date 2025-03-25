@@ -1,5 +1,5 @@
 {
-  "id": "903b2916-c825-45ed-9f8a-bf7aa8c0eea3",
+  "id": "f188d528-90a1-4d54-b18c-7b03ced7921f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -118,8 +118,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "claimed": {
-          "name": "claimed",
+        "withdrawn": {
+          "name": "withdrawn",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -217,11 +217,11 @@
           "method": "btree",
           "with": {}
         },
-        "wheel_deposit_claimed_idx": {
-          "name": "wheel_deposit_claimed_idx",
+        "wheel_deposit_withdrawn_idx": {
+          "name": "wheel_deposit_withdrawn_idx",
           "columns": [
             {
-              "expression": "claimed",
+              "expression": "withdrawn",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
