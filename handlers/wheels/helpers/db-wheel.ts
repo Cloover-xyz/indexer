@@ -1,6 +1,9 @@
-import { DepositedEvent, WheelContractDeployedEvent } from "../types/types";
-import { eq } from "drizzle-orm";
+import type { Event } from "@apibara/starknet";
+import { useLogger } from "@apibara/indexer/plugins";
+import { eq, and } from "drizzle-orm";
+import { Contract, shortString } from "starknet";
 
+import { DepositedEvent, WheelContractDeployedEvent } from "../types/types";
 import {
   wheelTable,
   tokenTable,
@@ -9,10 +12,10 @@ import {
   wheelRoundParticipantTable,
   userTable,
   wheelMetricsTable,
+  eventTable,
 } from "lib/schema/index";
 
 import { getStarknetProvider } from "utils/provider";
-import { Contract, shortString } from "starknet";
 import { RoundStatus } from "../types/enums";
 import {
   WheelDbType,
@@ -21,6 +24,7 @@ import {
   WheelRoundParticipantDbType,
 } from "lib/types/wheels";
 import {
+  getEventId,
   getTokenId,
   getUserId,
   getWheelDepositId,
@@ -34,6 +38,73 @@ import { UserDbType } from "lib/types/users";
 
 import { configManager } from "lib/configManager";
 import { addBigIntish } from "utils/maths";
+
+export const checkEventExists = async (
+  eventId: string,
+  blockNumber: number,
+  eventName: string,
+  eventData: readonly `0x${string}`[]
+) => {
+  const { db } = configManager.useDrizzleStorageQuery();
+  const event = await db.query.eventTable.findFirst({
+    where: and(
+      eq(eventTable.id, eventId),
+      eq(eventTable.eventName, eventName),
+      eq(eventTable.data, eventData),
+      eq(eventTable.blockNumber, blockNumber)
+    ),
+  });
+  return event;
+};
+
+export const insertEvent = async (
+  eventId: string,
+  blockNumber: number,
+  eventName: string,
+  eventData: readonly `0x${string}`[],
+  timestamp: Date
+) => {
+  const { db } = configManager.useDrizzleStorageQuery();
+  await db.insert(eventTable).values({
+    id: eventId,
+    eventName: eventName,
+    data: eventData,
+    createdAt: timestamp,
+    blockNumber,
+  });
+};
+
+// Protects against duplicate events handled due to `pending` finality settings
+// Returns true if the event has already been handled to stop the handler from running
+export const checkEventAlreadyHandled = async (
+  event: Event,
+  blockNumber: bigint,
+  eventName: string,
+  timestamp: Date
+): Promise<boolean> => {
+  const logger = useLogger();
+  const eventId = getEventId(event.transactionHash, event.eventIndex);
+  const eventExists = await checkEventExists(
+    eventId,
+    Number(blockNumber),
+    eventName,
+    event.data
+  );
+  if (eventExists) {
+    logger.info(`Event ${eventName} already handled: ${eventId}`);
+    return true;
+  }
+
+  await insertEvent(
+    eventId,
+    Number(blockNumber),
+    eventName,
+    event.data,
+    timestamp
+  );
+
+  return false;
+};
 
 export const getUser = async (
   userAddress: string

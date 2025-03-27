@@ -1,7 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
-import type { Plugin } from "apibara/rollup";
 import { defineConfig } from "apibara/config";
 import { ENV } from "./utils/env";
+import { Plugin } from "apibara/rollup";
 
 export default defineConfig({
   runtimeConfig: {
@@ -9,7 +9,7 @@ export default defineConfig({
     cloover: {
       startingBlock: 544_220,
       streamUrl: "https://starknet-sepolia.preview.apibara.org",
-      postgresConnectionString: ENV.POSTGRES_DATABASE_URL ?? "memory://wheel",
+      postgresConnectionString: ENV.POSTGRES_DATABASE_URL ?? "memory://cloover",
     },
   },
   rollupConfig: {

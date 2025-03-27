@@ -1,7 +1,6 @@
 import { BlockHeader, Event, getBigIntSelector } from "@apibara/starknet";
 import { useLogger } from "@apibara/indexer/plugins";
 
-import { NetworkType } from "utils/provider";
 import {
   getMaximumNumberOfDepositsPerRoundUpdatedEventData,
   getMaximumNumberOfParticipantsPerRoundUpdatedEventData,
@@ -14,7 +13,11 @@ import {
   getVrfUpdatedEventData,
   getWheelContractDeployedEventData,
 } from "./helpers/eventsData";
-import { insertWheel, updateWheel } from "./helpers/db-wheel";
+import {
+  checkEventAlreadyHandled,
+  insertWheel,
+  updateWheel,
+} from "./helpers/db-wheel";
 
 const CONTRACT_DEPLOYED_EVENT_SELECTOR =
   getBigIntSelector("ContractDeployed").toString();
@@ -55,7 +58,17 @@ export const handleWheelContractDeployed = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "ContractDeployed",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getWheelContractDeployedEventData(event);
   logger.log("Event ContractDeployed", { data });
   await insertWheel(wheelAddress, data, timestamp);
@@ -66,7 +79,17 @@ export const handlePricePerTicketUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "PricePerTicketUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getPricePerTicketUpdatedEventData(event);
   logger.log("Event PricePerTicketUpdated", { data });
   await updateWheel(wheelAddress, {
@@ -80,7 +103,17 @@ export const handleProtocolFeeBpUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "ProtocolFeeBpUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getProtocolFeeBpUpdatedEventData(event);
   logger.log("Event ProtocolFeeBpUpdated", { data });
   await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });
@@ -91,7 +124,17 @@ export const handleProtocolFeeRecipientUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "ProtocolFeeRecipientUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getProtocolFeeRecipientUpdatedEventData(event);
   logger.log("Event ProtocolFeeRecipientUpdated", { data });
   await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });
@@ -102,7 +145,17 @@ export const handleRoundDurationUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "RoundDurationUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getRoundDurationUpdatedEventData(event);
   logger.log("Event RoundDurationUpdated", { data });
   await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });
@@ -110,7 +163,12 @@ export const handleRoundDurationUpdated = async (
 
 export const handleVrfUpdated = async (event: Event, header: BlockHeader) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(event, blockNumber, "VrfUpdated", timestamp)
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getVrfUpdatedEventData(event);
   logger.log("Event VrfUpdated", { data });
   await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });
@@ -121,7 +179,17 @@ export const handleMaximumNumberOfDepositsPerRoundUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "MaximumNumberOfDepositsPerRoundUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } =
     getMaximumNumberOfDepositsPerRoundUpdatedEventData(event);
   logger.log("Event MaximumNumberOfDepositsPerRoundUpdated", { data });
@@ -133,7 +201,17 @@ export const handleMaximumNumberOfParticipantsPerRoundUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "MaximumNumberOfParticipantsPerRoundUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } =
     getMaximumNumberOfParticipantsPerRoundUpdatedEventData(event);
   logger.log("Event MaximumNumberOfParticipantsPerRoundUpdated", { data });
@@ -145,7 +223,17 @@ export const handleMaximumParticipantTicketsPerRoundUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "MaximumParticipantTicketsPerRoundUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } =
     getMaximumParticipantTicketsPerRoundUpdatedEventData(event);
   logger.log("Event MaximumParticipantTicketsPerRoundUpdated", { data });
@@ -157,7 +245,17 @@ export const handleOutflowAllowedToggled = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "OutflowAllowedToggled",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getOutflowAllowedToggledEventData(event);
   logger.log("Event OutflowAllowedToggled", { data });
   await updateWheel(wheelAddress, { ...data, updatedAt: timestamp });

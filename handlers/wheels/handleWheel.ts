@@ -31,6 +31,7 @@ import {
   getUser,
   getUserWheelMetrics,
   updateUserWheelMetrics,
+  checkEventAlreadyHandled,
 } from "./helpers/db-wheel";
 import { RoundStatus } from "./types/enums";
 import { zeroBI } from "utils/converters";
@@ -56,7 +57,17 @@ export const handleRoundStatusUpdated = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "RoundStatusUpdated",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { wheelAddress, data } = getRoundStatusUpdatedEventData(event);
   logger.log("Event RoundStatusUpdated", { data });
   const { roundId, status } = data;
@@ -86,7 +97,17 @@ export const handleRoundCutoffTimeSet = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "RoundCutoffTimeSet",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { data } = getRoundCutoffTimeSetEventData(event);
   logger.log("Event RoundCutoffTimeSet", { data });
   const { roundId, cutoffTime } = data;
@@ -102,7 +123,12 @@ export const handleRoundCutoffTimeSet = async (
 
 export const handleDeposited = async (event: Event, header: BlockHeader) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(event, blockNumber, "Deposited", timestamp)
+  ) {
+    return;
+  }
   const { data } = getDepositedEventData(event);
   logger.log("Event Deposited", { data });
   const round = await getRound(data.roundId);
@@ -168,7 +194,17 @@ export const handleDepositsWithdrawn = async (
   header: BlockHeader
 ) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "DepositsWithdrawn",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { data } = getDepositsWithdrawnEventData(event);
   logger.log("Event DepositsWithdrawn", { data });
   for (const withdrawalCalldata of data.withdrawalCalldata) {
@@ -188,7 +224,17 @@ export const handleDepositsWithdrawn = async (
 
 export const handlePrizeClaimed = async (event: Event, header: BlockHeader) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(
+      event,
+      blockNumber,
+      "PrizeClaimed",
+      timestamp
+    )
+  ) {
+    return;
+  }
   const { data } = getPrizeClaimedEventData(event);
   logger.log("Event PrizeClaimed", { data });
   const user = await getUser(data.winner);
@@ -210,7 +256,12 @@ export const handlePrizeClaimed = async (event: Event, header: BlockHeader) => {
 
 export const handleWinnerDrawn = async (event: Event, header: BlockHeader) => {
   const logger = useLogger();
-  const { timestamp } = header;
+  const { timestamp, blockNumber } = header;
+  if (
+    await checkEventAlreadyHandled(event, blockNumber, "WinnerDrawn", timestamp)
+  ) {
+    return;
+  }
   const { data } = getWinnerDrawnEventData(event);
   logger.log("Event WinnerDrawn", { data });
   const user = await getUser(data.winner);
