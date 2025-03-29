@@ -1,13 +1,13 @@
 import type { ApibaraRuntimeConfig } from "apibara/types";
-import { drizzle as nodePgDrizzle } from "drizzle-orm/node-postgres";
-import { drizzle as pgLiteDrizzle } from "drizzle-orm/pglite";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
-import pg from "pg";
 import * as userSchema from "./schema/users";
 import * as wheelSchema from "./schema/wheels";
 import * as tokenSchema from "./schema/tokens";
 import * as eventSchema from "./schema/events";
-import { useDrizzleStorage } from "@apibara/plugin-drizzle";
+import {
+  useDrizzleStorage,
+  drizzle,
+  type PgliteDatabase,
+} from "@apibara/plugin-drizzle";
 import { getValidatedNetwork, type NetworkType } from "utils/provider";
 
 interface GlobalConfig {
@@ -23,8 +23,9 @@ const schema = {
   ...tokenSchema,
   ...eventSchema,
 } as const;
+
 type Schema = typeof schema;
-type Database = NodePgDatabase<Schema>;
+type Database = PgliteDatabase<Schema>;
 
 class ConfigManager {
   private static instance: ConfigManager;
@@ -50,6 +51,11 @@ class ConfigManager {
       startingBlock: BigInt(startingBlock),
       streamUrl,
     };
+    // Initialize the database instance
+    this.dbInstance = drizzle({
+      schema,
+      connectionString: postgresConnectionString,
+    });
   }
 
   public getConfig(): GlobalConfig {
@@ -77,24 +83,10 @@ class ConfigManager {
 
   public getDb() {
     if (!this.dbInstance) {
-      const connectionString = this.getPostgresConnectionString();
-
-      // Create pglite instance for memory database
-      if (connectionString.includes("memory")) {
-        this.dbInstance = pgLiteDrizzle({
-          schema,
-          connection: {
-            dataDir: connectionString,
-          },
-        }) as unknown as Database;
-      } else {
-        // Create node-postgres instance for regular PostgreSQL
-        const pool = new pg.Pool({
-          connectionString,
-        });
-
-        this.dbInstance = nodePgDrizzle(pool, { schema });
-      }
+      this.dbInstance = drizzle({
+        schema,
+        connectionString: this.getPostgresConnectionString(),
+      });
     }
     return this.dbInstance;
   }
