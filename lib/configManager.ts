@@ -6,6 +6,7 @@ import pg from "pg";
 import * as userSchema from "./schema/users";
 import * as wheelSchema from "./schema/wheels";
 import * as tokenSchema from "./schema/tokens";
+import * as eventSchema from "./schema/events";
 import { useDrizzleStorage } from "@apibara/plugin-drizzle";
 import { getValidatedNetwork, type NetworkType } from "utils/provider";
 
@@ -16,7 +17,12 @@ interface GlobalConfig {
   streamUrl: string;
 }
 
-const schema = { ...userSchema, ...wheelSchema, ...tokenSchema } as const;
+const schema = {
+  ...userSchema,
+  ...wheelSchema,
+  ...tokenSchema,
+  ...eventSchema,
+} as const;
 type Schema = typeof schema;
 type Database = NodePgDatabase<Schema>;
 

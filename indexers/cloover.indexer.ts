@@ -2,9 +2,11 @@ import { defineIndexer } from "@apibara/indexer";
 import { drizzleStorage } from "@apibara/plugin-drizzle";
 import { StarknetStream } from "@apibara/starknet";
 import type { ApibaraRuntimeConfig } from "apibara/types";
+import type { Block } from "@apibara/starknet";
 
 import { handleEvent } from "handlers";
 import { configManager } from "../lib/configManager";
+import { useLogger } from "@apibara/indexer/plugins";
 
 export default function (runtimeConfig: ApibaraRuntimeConfig) {
   configManager.initialize(runtimeConfig);
@@ -13,7 +15,7 @@ export default function (runtimeConfig: ApibaraRuntimeConfig) {
 
   return defineIndexer(StarknetStream)({
     streamUrl: configManager.getStreamUrl(),
-    finality: "accepted",
+    finality: "pending",
     startingBlock: configManager.getStartingBlock(),
     filter: {
       events: [
@@ -24,8 +26,10 @@ export default function (runtimeConfig: ApibaraRuntimeConfig) {
       ],
     },
     plugins: [drizzleStorage({ db, persistState: true })],
-    async transform({ block }) {
+    async transform({ block }: { block: Block }) {
+      const logger = useLogger();
       const { events, header } = block;
+      logger.info(`Processing block ${header.blockNumber}`);
       if (events.length === 0) {
         return;
       }

@@ -1,3 +1,7 @@
+export const getEventId = (txHash: string, eventIndex: number): string => {
+  return `${txHash}-${eventIndex}`.toLowerCase();
+};
+
 export const getUserId = (userAddress: string): string => {
   return userAddress.toLowerCase();
 };
