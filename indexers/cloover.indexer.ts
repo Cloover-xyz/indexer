@@ -25,7 +25,7 @@ export default function (runtimeConfig: ApibaraRuntimeConfig) {
         },
       ],
     },
-    plugins: [drizzleStorage({ db, persistState: true })],
+    plugins: [drizzleStorage({ db })],
     async transform({ block }: { block: Block }) {
       const logger = useLogger();
       const { events, header } = block;
