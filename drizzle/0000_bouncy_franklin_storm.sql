@@ -95,6 +95,14 @@ CREATE TABLE IF NOT EXISTS "wheel_metrics" (
 	"updated_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "events" (
+	"id" text PRIMARY KEY NOT NULL,
+	"event_name" text NOT NULL,
+	"block_number" integer NOT NULL,
+	"data" jsonb NOT NULL,
+	"created_at" timestamp with time zone NOT NULL
+);
+--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "wheel_deposits" ADD CONSTRAINT "wheel_deposits_token_id_tokens_id_fk" FOREIGN KEY ("token_id") REFERENCES "public"."tokens"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -170,4 +178,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS "wheel_token_id_idx" ON "wheels" USING btree (
 CREATE UNIQUE INDEX IF NOT EXISTS "user_idx" ON "users" USING btree ("id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "user_address_idx" ON "users" USING btree ("address");--> statement-breakpoint
 CREATE UNIQUE INDEX IF NOT EXISTS "wheel_metrics_id_idx" ON "wheel_metrics" USING btree ("id");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "wheel_metrics_user_id_idx" ON "wheel_metrics" USING btree ("user_id");
+CREATE INDEX IF NOT EXISTS "wheel_metrics_user_id_idx" ON "wheel_metrics" USING btree ("user_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "event_id_idx" ON "events" USING btree ("id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "event_id_block_number_idx" ON "events" USING btree ("id","block_number");
